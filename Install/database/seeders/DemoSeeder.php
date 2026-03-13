@@ -10,6 +10,7 @@ use App\Models\SystemSetting;
 use App\Models\Template;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Models\UserAiSettings;
 use Illuminate\Database\Seeder;
 
 class DemoSeeder extends Seeder
@@ -58,6 +59,9 @@ class DemoSeeder extends Seeder
 
         // 6. Set default plan for new users to Pro
         $this->setDefaultPlan();
+
+        // 6.1 Create demo user account
+        $this->seedDemoUser();
 
         // 7. Configure internal AI provider
         $this->seedInternalAiProvider($aiProvider);
@@ -202,6 +206,56 @@ class DemoSeeder extends Seeder
 
         SystemSetting::set('default_plan_id', $proPlan->id, 'integer', 'plans');
         $this->command?->info("Set default plan for new users: {$proPlan->name} (ID: {$proPlan->id})");
+    }
+
+    /**
+     * Create a demo user account for demo mode.
+     */
+    private function seedDemoUser(): void
+    {
+        $proPlan = Plan::where('slug', 'pro')->first();
+
+        $demo = User::firstOrCreate(
+            ['email' => 'demo@webby.com'],
+            [
+                'name' => 'Demo User',
+                'password' => bcrypt('demo1234'),
+                'role' => 'user',
+                'email_verified_at' => now(),
+                'plan_id' => $proPlan?->id,
+                'build_credits' => $proPlan?->getMonthlyBuildCredits() ?? 0,
+                'credits_reset_at' => now(),
+            ]
+        );
+
+        if ($proPlan) {
+            Subscription::firstOrCreate(
+                ['user_id' => $demo->id, 'status' => Subscription::STATUS_ACTIVE],
+                [
+                    'plan_id' => $proPlan->id,
+                    'amount' => $proPlan->price,
+                    'payment_method' => Subscription::PAYMENT_MANUAL,
+                    'starts_at' => now(),
+                    'renewal_at' => now()->addMonth(),
+                    'approved_at' => now(),
+                    'approved_by' => $demo->id,
+                    'admin_notes' => 'Seeded subscription for demo user',
+                ]
+            );
+
+            $demo->update(['plan_id' => $proPlan->id]);
+        }
+
+        UserAiSettings::firstOrCreate(
+            ['user_id' => $demo->id],
+            [
+                'sounds_enabled' => true,
+                'sound_style' => 'playful',
+                'sound_volume' => 100,
+            ]
+        );
+
+        $this->command?->info("Created/updated demo user: {$demo->email}");
     }
 
     /**

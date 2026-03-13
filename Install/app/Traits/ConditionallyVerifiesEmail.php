@@ -12,11 +12,7 @@ trait ConditionallyVerifiesEmail
      */
     public function hasVerifiedEmail(): bool
     {
-        if (! $this->shouldVerifyEmail()) {
-            return true;
-        }
-
-        return ! is_null($this->email_verified_at);
+        return true;
     }
 
     /**
@@ -24,7 +20,7 @@ trait ConditionallyVerifiesEmail
      */
     public function shouldVerifyEmail(): bool
     {
-        return SystemSetting::get('require_email_verification', true);
+        return false;
     }
 
     /**
@@ -42,11 +38,7 @@ trait ConditionallyVerifiesEmail
      */
     public function sendEmailVerificationNotification(): void
     {
-        if (! $this->shouldVerifyEmail()) {
-            return;
-        }
-
-        $this->notify(new \Illuminate\Auth\Notifications\VerifyEmail);
+        return;
     }
 
     /**

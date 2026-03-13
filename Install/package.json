@@ -82,6 +82,7 @@
         "laravel-echo": "^2.3.0",
         "lexical": "^0.39.0",
         "lucide-react": "^0.562.0",
+        "pusher": "^5.3.2",
         "pusher-js": "^8.4.0",
         "react-dropzone": "^14.3.8",
         "react-flagpack": "^2.0.6",

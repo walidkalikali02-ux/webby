@@ -151,7 +151,13 @@ class AiProvider extends Model
      */
     public function getApiKey(): ?string
     {
-        return $this->credentials['api_key'] ?? null;
+        if (! empty($this->credentials['api_key'])) {
+            return $this->credentials['api_key'];
+        }
+
+        $service = config('services.'.$this->type, []);
+
+        return $service['api_key'] ?? null;
     }
 
     /**
@@ -159,7 +165,10 @@ class AiProvider extends Model
      */
     public function getBaseUrl(): string
     {
+        $service = config('services.'.$this->type, []);
+
         return $this->config['base_url']
+            ?? ($service['base_url'] ?? null)
             ?? self::DEFAULT_BASE_URLS[$this->type]
             ?? '';
     }

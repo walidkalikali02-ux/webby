@@ -7,6 +7,7 @@ use App\Events\Builder\BuilderErrorEvent;
 use App\Events\Builder\BuilderStatusEvent;
 use App\Listeners\SyncProjectBuildStatus;
 use App\Listeners\TrackBuildCreditUsage;
+use App\Models\AiProvider;
 use App\Models\Project;
 use App\Models\Subscription;
 use App\Models\SystemSetting;
@@ -65,6 +66,7 @@ class AppServiceProvider extends ServiceProvider
             $this->configureMailSettings();
             $this->configureSocialiteProviders();
             $this->configureFirebaseSettings();
+            $this->configureZhipuProvider();
         } catch (\Exception $e) {
             // Database not available yet (fresh install)
             return;
@@ -197,6 +199,49 @@ class AppServiceProvider extends ServiceProvider
                     'services.firebase.system_messaging_sender_id' => $settings['firebase_system_messaging_sender_id'] ?? config('services.firebase.system_messaging_sender_id'),
                     'services.firebase.system_app_id' => $settings['firebase_system_app_id'] ?? config('services.firebase.system_app_id'),
                 ]);
+            }
+        } catch (\Exception $e) {
+            // Ignore if settings table doesn't exist yet
+        }
+    }
+
+    /**
+     * Auto-create Zhipu provider from env if missing.
+     */
+    protected function configureZhipuProvider(): void
+    {
+        try {
+            $apiKey = config('services.zhipu.api_key');
+
+            if (empty($apiKey)) {
+                return;
+            }
+
+            if (! Schema::hasTable('ai_providers')) {
+                return;
+            }
+
+            $existing = AiProvider::where('type', AiProvider::TYPE_ZHIPU)->first();
+            if ($existing) {
+                return;
+            }
+
+            $provider = AiProvider::create([
+                'name' => 'Zhipu',
+                'type' => AiProvider::TYPE_ZHIPU,
+                'credentials' => [], // read API key from env to avoid storing it in DB
+                'config' => [
+                    'base_url' => config('services.zhipu.base_url'),
+                    'default_model' => 'glm-5',
+                ],
+                'available_models' => ['glm-5', 'glm-4.7', 'glm-4.5-air'],
+                'status' => 'active',
+                'is_default' => false,
+            ]);
+
+            if (! SystemSetting::get('default_ai_provider_id')) {
+                SystemSetting::set('default_ai_provider_id', $provider->id, 'integer', 'plans');
+                $provider->update(['is_default' => true]);
             }
         } catch (\Exception $e) {
             // Ignore if settings table doesn't exist yet

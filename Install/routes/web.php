@@ -49,6 +49,9 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+$authVerified = ['auth'];
+$authVerifiedAdmin = ['auth', 'admin'];
+
 /*
 |--------------------------------------------------------------------------
 | Installation Routes (Before any DB-dependent routes)
@@ -96,7 +99,7 @@ if (config('app.env') === 'local' && config('app.demo')) {
 | Application Routes (require installation)
 |--------------------------------------------------------------------------
 */
-Route::middleware('installed')->group(function () {
+Route::middleware('installed')->group(function () use ($authVerified, $authVerifiedAdmin) {
 
     Route::get('/', function () {
         // Check if landing page is enabled
@@ -218,22 +221,22 @@ Route::middleware('installed')->group(function () {
     })->name('cookies');
 
     Route::get('/create', [CreateController::class, 'index'])
-        ->middleware(['auth', 'verified'])
+        ->middleware($authVerified)
         ->name('create');
 
     Route::get('/create/ai-content', [CreateController::class, 'aiContent'])
-        ->middleware(['auth', 'verified'])
+        ->middleware($authVerified)
         ->name('create.ai-content');
 
     // Project chat routes
-    Route::middleware(['auth', 'verified'])->group(function () {
+    Route::middleware($authVerified)->group(function () {
         Route::get('/project/{project}', [ChatController::class, 'show'])->name('chat');
         Route::post('/project/send', [ChatController::class, 'send'])->name('chat.send');
         Route::get('/project/{project}/suggestions', [ChatController::class, 'suggestions'])->name('chat.suggestions');
     });
 
     // Project Settings
-    Route::middleware(['auth', 'verified'])->group(function () {
+    Route::middleware($authVerified)->group(function () {
         Route::get('/project/{project}/settings', [ProjectSettingsController::class, 'show'])->name('project.settings');
         Route::put('/project/{project}/settings/general', [ProjectSettingsController::class, 'updateGeneral']);
         Route::put('/project/{project}/settings/knowledge', [ProjectSettingsController::class, 'updateKnowledge']);
@@ -248,14 +251,14 @@ Route::middleware('installed')->group(function () {
     });
 
     // Publishing
-    Route::middleware(['auth', 'verified'])->group(function () {
+    Route::middleware($authVerified)->group(function () {
         Route::post('/api/subdomain/check-availability', [ProjectPublishController::class, 'checkAvailability']);
         Route::post('/project/{project}/publish', [ProjectPublishController::class, 'publish']);
         Route::post('/project/{project}/unpublish', [ProjectPublishController::class, 'unpublish']);
     });
 
     // Custom Domain routes
-    Route::middleware(['auth', 'verified'])->group(function () {
+    Route::middleware($authVerified)->group(function () {
         Route::post('/api/domain/check-availability', [ProjectCustomDomainController::class, 'checkAvailability']);
         Route::post('/project/{project}/domain', [ProjectCustomDomainController::class, 'store'])->name('project.domain.store');
         Route::post('/project/{project}/domain/verify', [ProjectCustomDomainController::class, 'verify'])->name('project.domain.verify');
@@ -264,7 +267,7 @@ Route::middleware('installed')->group(function () {
     });
 
     // Projects routes
-    Route::middleware(['auth', 'verified'])->group(function () {
+    Route::middleware($authVerified)->group(function () {
         Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
         Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
         Route::get('/projects/trash', [ProjectController::class, 'trash'])->name('projects.trash');
@@ -276,18 +279,18 @@ Route::middleware('installed')->group(function () {
     });
 
     // File Manager routes
-    Route::middleware(['auth', 'verified'])->group(function () {
+    Route::middleware($authVerified)->group(function () {
         Route::get('/file-manager', [FileManagerController::class, 'index'])->name('file-manager.index');
     });
 
     // Database (Firebase) routes
-    Route::middleware(['auth', 'verified'])->group(function () {
+    Route::middleware($authVerified)->group(function () {
         Route::get('/database', [DatabaseController::class, 'index'])->name('database.index');
         Route::get('/firebase/collections', [\App\Http\Controllers\FirebaseCollectionController::class, 'index'])->name('firebase.collections');
     });
 
     // Project Files routes
-    Route::middleware(['auth', 'verified'])->group(function () {
+    Route::middleware($authVerified)->group(function () {
         Route::get('/project/{project}/files', [ProjectFileController::class, 'index'])->name('project.files.index');
         Route::post('/project/{project}/files', [ProjectFileController::class, 'store'])->name('project.files.store');
         Route::get('/project/{project}/files/{file}', [ProjectFileController::class, 'show'])->name('project.file.serve');
@@ -296,7 +299,7 @@ Route::middleware('installed')->group(function () {
     });
 
     // Project Firebase routes
-    Route::middleware(['auth', 'verified'])->group(function () {
+    Route::middleware($authVerified)->group(function () {
         Route::get('/project/{project}/firebase/config', [ProjectFirebaseController::class, 'getConfig'])->name('project.firebase.config');
         Route::put('/project/{project}/firebase/config', [ProjectFirebaseController::class, 'updateConfig'])->name('project.firebase.config.update');
         Route::delete('/project/{project}/firebase/config', [ProjectFirebaseController::class, 'resetConfig'])->name('project.firebase.config.reset');
@@ -341,7 +344,7 @@ Route::middleware('installed')->group(function () {
     Route::post('/locale', [LocaleController::class, 'update'])->name('locale.update');
 
     // User Billing Routes
-    Route::middleware(['auth', 'verified'])->prefix('billing')->group(function () {
+    Route::middleware($authVerified)->prefix('billing')->group(function () {
         Route::get('/', [\App\Http\Controllers\BillingController::class, 'index'])->name('billing.index');
         Route::get('/plans', [\App\Http\Controllers\BillingController::class, 'plans'])->name('billing.plans');
         Route::get('/invoice/{transaction}', [\App\Http\Controllers\BillingController::class, 'downloadInvoice'])->name('billing.invoice');
@@ -352,7 +355,8 @@ Route::middleware('installed')->group(function () {
     });
 
     // Admin Routes
-    Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->group(function () {
+    Route::middleware($authVerifiedAdmin)->prefix('admin')->group(function () {
+        Route::get('/', fn() => redirect()->route('admin.overview'));
         Route::get('overview', [AdminController::class, 'overview'])->name('admin.overview');
         Route::post('refresh-stats', [AdminController::class, 'refreshStats'])->name('admin.refresh-stats');
 
@@ -476,13 +480,13 @@ Route::middleware('installed')->group(function () {
     Route::get('payment-gateways/callback', [PaymentGatewayController::class, 'callback'])->name('payment.callback');
 
     // Authenticated payment routes
-    Route::middleware(['auth', 'verified'])->group(function () {
+    Route::middleware($authVerified)->group(function () {
         Route::post('payment/initiate', [PaymentGatewayController::class, 'initiatePayment'])->name('payment.initiate');
         Route::get('payment/gateways', [PaymentGatewayController::class, 'getAvailableGateways'])->name('payment.gateways');
     });
 
     // Builder Proxy Routes
-    Route::middleware(['auth', 'verified'])->prefix('builder')->group(function () {
+    Route::middleware($authVerified)->prefix('builder')->group(function () {
         Route::get('available', [BuilderProxyController::class, 'getAvailableBuilders'])->name('builder.available');
 
         // Project-specific builder routes
@@ -502,7 +506,7 @@ Route::middleware('installed')->group(function () {
     });
 
     // Preview Routes - serve built project previews (with inspector injection)
-    Route::middleware(['auth', 'verified'])->group(function () {
+    Route::middleware($authVerified)->group(function () {
         Route::get('/preview/{project}/exists', [PreviewController::class, 'exists'])->name('preview.exists');
         Route::get('/preview/{project}/{path?}', [PreviewController::class, 'serve'])
             ->where('path', '.*')
@@ -519,14 +523,14 @@ Route::middleware('installed')->group(function () {
     Route::get('/r/{codeOrSlug}', [ReferralTrackingController::class, 'track'])->name('referral.track');
 
     // Referral Actions (Authenticated)
-    Route::middleware(['auth', 'verified'])->prefix('referral')->group(function () {
+    Route::middleware($authVerified)->prefix('referral')->group(function () {
         Route::post('/generate-code', [ReferralController::class, 'generateCode'])->name('referral.generate-code');
         Route::put('/update-slug', [ReferralController::class, 'updateSlug'])->name('referral.update-slug');
         Route::get('/share-data', [ReferralController::class, 'getShareData'])->name('referral.share-data');
     });
 
     // User Notifications (Authenticated)
-    Route::middleware(['auth', 'verified'])->prefix('api')->group(function () {
+    Route::middleware($authVerified)->prefix('api')->group(function () {
         Route::get('/notifications', [NotificationController::class, 'index'])
             ->name('api.notifications.index');
         Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])

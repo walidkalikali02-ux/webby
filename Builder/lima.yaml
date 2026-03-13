@@ -1,0 +1,14 @@
+images:
+  - location: "https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img"
+    arch: "x86_64"
+
+vmType: qemu
+
+cpus: 4
+memory: "8GiB"
+disk: "30GiB"
+
+mounts:
+  - location: "/Users/macbookair/Downloads/webby-104/codecanyon-61857601-webby-aipowered-nocode-website-builder-saas-platform/Builder/prebuilt"
+    mountPoint: /builder
+    writable: true

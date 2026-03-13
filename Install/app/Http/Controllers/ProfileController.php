@@ -11,7 +11,6 @@ use App\Models\SystemSetting;
 use App\Models\UserAiSettings;
 use App\Models\UserConsent;
 use App\Services\AuditLogService;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -63,7 +62,7 @@ class ProfileController extends Controller
         $canUseOwnKey = $plan?->allowsUserAiApiKey() ?? false;
 
         return Inertia::render('Profile/Edit', [
-            'mustVerifyEmail' => $user instanceof MustVerifyEmail,
+            'mustVerifyEmail' => false,
             'status' => session('status'),
             'consents' => $consents,
             'dataExportEnabled' => SystemSetting::get('data_export_enabled', true),
