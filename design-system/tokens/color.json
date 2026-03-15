@@ -1,0 +1,36 @@
+{
+  "color": {
+    "bg": {
+      "dark": { "value": "#0a0a0a" },
+      "light": { "value": "#ffffff" }
+    },
+    "surface": {
+      "dark": { "value": "#1a1a1a" },
+      "light": { "value": "#f5f5f5" }
+    },
+    "text": {
+      "primary": {
+        "dark": { "value": "#ffffff" },
+        "light": { "value": "#000000" }
+      },
+      "secondary": {
+        "dark": { "value": "#9ca3af" },
+        "light": { "value": "#6b7280" }
+      }
+    },
+    "accent": {
+      "green": {
+        "dark": { "value": "#00ff88" },
+        "light": { "value": "#00cc6a" }
+      },
+      "blue": {
+        "dark": { "value": "#3b82f6" },
+        "light": { "value": "#2563eb" }
+      }
+    },
+    "border": {
+      "dark": { "value": "#333333" },
+      "light": { "value": "#e5e7eb" }
+    }
+  }
+}

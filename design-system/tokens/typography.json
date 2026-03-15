@@ -1,0 +1,22 @@
+{
+  "font": {
+    "family": {
+      "sans": { "value": "Inter, SF Pro, system-ui, sans-serif" },
+      "mono": { "value": "JetBrains Mono, SF Mono, monospace" }
+    },
+    "size": {
+      "xs": { "value": "12px" },
+      "sm": { "value": "14px" },
+      "base": { "value": "16px" },
+      "lg": { "value": "18px" },
+      "xl": { "value": "24px" },
+      "2xl": { "value": "32px" },
+      "3xl": { "value": "48px" }
+    },
+    "weight": {
+      "normal": { "value": "400" },
+      "medium": { "value": "500" },
+      "bold": { "value": "700" }
+    }
+  }
+}
