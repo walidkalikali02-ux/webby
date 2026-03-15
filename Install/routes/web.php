@@ -198,6 +198,72 @@ Route::middleware('installed')->group(function () use ($authVerified, $authVerif
     Route::get('/landing/ai-content', [CreateController::class, 'landingAiContent'])
         ->name('landing.ai-content');
 
+    Route::post('/landing/lead', [\App\Http\Controllers\LandingLeadController::class, 'store'])
+        ->middleware('throttle:30,1')
+        ->name('landing.lead');
+
+    Route::get('/marketer', function () {
+        $plans = \App\Models\Plan::active()
+            ->orderBy('sort_order')
+            ->get(['id', 'name', 'slug', 'description', 'price', 'billing_period',
+                'features', 'is_popular', 'max_projects', 'monthly_build_credits',
+                'allow_user_ai_api_key']);
+
+        $canCreateProject = true;
+        $cannotCreateReason = null;
+        $isPusherConfigured = true;
+
+        if (auth()->check()) {
+            $broadcastService = app(BroadcastService::class);
+            $isPusherConfigured = $broadcastService->isConfigured();
+
+            $buildCreditService = app(BuildCreditService::class);
+            $canBuildResult = $buildCreditService->canPerformBuild(auth()->user());
+            $canCreateProject = $canBuildResult['allowed'];
+            $cannotCreateReason = $canBuildResult['reason'];
+        }
+
+        return Inertia::render('Marketer', [
+            'canLogin' => Route::has('login'),
+            'canRegister' => Route::has('register') && SystemSetting::get('enable_registration', true),
+            'plans' => $plans,
+            'isPusherConfigured' => $isPusherConfigured,
+            'canCreateProject' => $canCreateProject,
+            'cannotCreateReason' => $cannotCreateReason,
+        ]);
+    })->name('marketer');
+
+    Route::get('/founders', function () {
+        $plans = \App\Models\Plan::active()
+            ->orderBy('sort_order')
+            ->get(['id', 'name', 'slug', 'description', 'price', 'billing_period',
+                'features', 'is_popular', 'max_projects', 'monthly_build_credits',
+                'allow_user_ai_api_key']);
+
+        $canCreateProject = true;
+        $cannotCreateReason = null;
+        $isPusherConfigured = true;
+
+        if (auth()->check()) {
+            $broadcastService = app(BroadcastService::class);
+            $isPusherConfigured = $broadcastService->isConfigured();
+
+            $buildCreditService = app(BuildCreditService::class);
+            $canBuildResult = $buildCreditService->canPerformBuild(auth()->user());
+            $canCreateProject = $canBuildResult['allowed'];
+            $cannotCreateReason = $canBuildResult['reason'];
+        }
+
+        return Inertia::render('Founders', [
+            'canLogin' => Route::has('login'),
+            'canRegister' => Route::has('register') && SystemSetting::get('enable_registration', true),
+            'plans' => $plans,
+            'isPusherConfigured' => $isPusherConfigured,
+            'canCreateProject' => $canCreateProject,
+            'cannotCreateReason' => $cannotCreateReason,
+        ]);
+    })->name('founders');
+
     // Legal pages
     Route::get('/privacy', function () {
         return Inertia::render('Legal/Privacy', [

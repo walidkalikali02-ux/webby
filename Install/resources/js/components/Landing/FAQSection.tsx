@@ -52,7 +52,7 @@ export function FAQSection({ content, items, settings: _settings }: FAQSectionPr
     const subtitle = (content?.subtitle as string) || t('Have a different question? Reach out to our support team.');
 
     return (
-        <section className="py-16 lg:py-24">
+        <section id="faq" className="py-16 lg:py-24">
             <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Section Header */}
                 <div className="text-center mb-12">

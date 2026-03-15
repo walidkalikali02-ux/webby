@@ -104,4 +104,6 @@ return [
         'endpoint' => env('APP_SENTRY', 'https://sentry.titansys.dev'),
     ],
 
+    'lead_webhook_url' => env('LEAD_WEBHOOK_URL'),
+
 ];

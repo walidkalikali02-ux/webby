@@ -21,12 +21,15 @@ class AiProvider extends Model
 
     const TYPE_ZHIPU = 'zhipu';
 
+    const TYPE_GOOGLE = 'google';
+
     const TYPES = [
         self::TYPE_OPENAI => 'OpenAI',
         self::TYPE_ANTHROPIC => 'Anthropic',
         self::TYPE_GROK => 'Grok',
         self::TYPE_DEEPSEEK => 'DeepSeek',
         self::TYPE_ZHIPU => 'ZhipuAI',
+        self::TYPE_GOOGLE => 'Google Gemini',
     ];
 
     const DEFAULT_MODELS = [
@@ -47,6 +50,11 @@ class AiProvider extends Model
             'glm-5',
             'glm-4.7',
             'glm-4.5-air',
+        ],
+        self::TYPE_GOOGLE => [
+            'gemini-2.0-flash',
+            'gemini-1.5-pro',
+            'gemini-1.5-flash',
         ],
     ];
 
@@ -80,6 +88,11 @@ class AiProvider extends Model
             'glm-4.7' => ['input' => 0, 'output' => 0],
             'glm-4.5-air' => ['input' => 0, 'output' => 0],
         ],
+        self::TYPE_GOOGLE => [
+            'gemini-2.0-flash' => ['input' => 0.00, 'output' => 0.00],
+            'gemini-1.5-pro' => ['input' => 1.25, 'output' => 5.00],
+            'gemini-1.5-flash' => ['input' => 0.00, 'output' => 0.00],
+        ],
     ];
 
     /**
@@ -93,6 +106,7 @@ class AiProvider extends Model
         self::TYPE_GROK => 'https://api.x.ai/v1',
         self::TYPE_DEEPSEEK => 'https://api.deepseek.com',
         self::TYPE_ZHIPU => 'https://api.z.ai/api/anthropic',
+        self::TYPE_GOOGLE => 'https://generativelanguage.googleapis.com/v1beta',
     ];
 
     protected $fillable = [
@@ -222,6 +236,8 @@ class AiProvider extends Model
                     return $this->testDeepSeekConnection();
                 case self::TYPE_ZHIPU:
                     return $this->testZhipuConnection();
+                case self::TYPE_GOOGLE:
+                    return $this->testGoogleConnection();
 
                 default:
                     return ['success' => false, 'message' => 'Unknown provider type'];
@@ -332,6 +348,32 @@ class AiProvider extends Model
             'model' => $this->getDefaultModel(),
             'max_tokens' => 1,
             'messages' => [['role' => 'user', 'content' => 'Hi']],
+        ]);
+
+        if ($response->successful()) {
+            return ['success' => true, 'message' => 'Connection successful'];
+        }
+
+        return [
+            'success' => false,
+            'message' => $response->json('error.message', 'Connection failed'),
+        ];
+    }
+
+    /**
+     * Test Google Gemini API connection.
+     */
+    protected function testGoogleConnection(): array
+    {
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+        ])->post($this->getBaseUrl().'/models/'.$this->getDefaultModel().':generateContent?key='.$this->getApiKey(), [
+            'contents' => [
+                ['parts' => [['text' => 'Hi']]],
+            ],
+            'generationConfig' => [
+                'maxOutputTokens' => 1,
+            ],
         ]);
 
         if ($response->successful()) {

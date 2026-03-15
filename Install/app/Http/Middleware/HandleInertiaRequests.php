@@ -54,7 +54,7 @@ class HandleInertiaRequests extends Middleware
                     ->get()
                 : null,
             'appSettings' => fn () => [
-                'site_name' => SystemSetting::get('site_name', config('app.name')),
+                'site_name' => SystemSetting::get('site_name', 'Marketer'),
                 'site_tagline' => SystemSetting::get('site_tagline', ''),
                 'site_description' => SystemSetting::get('site_description', ''),
                 'site_logo' => SystemSetting::get('site_logo'),

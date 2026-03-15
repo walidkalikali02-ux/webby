@@ -7,6 +7,8 @@ import { ArrowRight, ArrowLeft, AlertCircle } from 'lucide-react';
 import { useScramble } from 'use-scramble';
 import { TrustedBy } from './TrustedBy';
 import { useTranslation } from '@/contexts/LanguageContext';
+import { useTheme } from '@/contexts/ThemeContext';
+import { trackCtaClick, withUtm } from '@/lib/analytics';
 import axios from 'axios';
 
 interface HeroSectionProps {
@@ -98,6 +100,7 @@ export function HeroSection({
     trustedBy,
 }: HeroSectionProps) {
     const { t, locale, isRtl } = useTranslation();
+    const { resolvedTheme } = useTheme();
     const [prompt, setPrompt] = useState('');
     const [isFocused, setIsFocused] = useState(false);
     const [suggestions, setSuggestions] = useState(initialSuggestions);
@@ -184,6 +187,8 @@ export function HeroSection({
         e.preventDefault();
         if (!prompt.trim()) return;
 
+        trackCtaClick('hero_prompt', 'hero_form');
+
         if (!auth.user) {
             // Save prompt for post-registration retrieval
             sessionStorage.setItem('landing_prompt', prompt.trim());
@@ -205,118 +210,182 @@ export function HeroSection({
         textareaRef.current?.focus();
     };
 
+    const heroPrimaryUrl = withUtm('/register', {
+        utm_source: 'landing',
+        utm_medium: 'cta',
+        utm_campaign: 'hero_primary',
+    });
+
+    const showcaseImage =
+        resolvedTheme === 'dark'
+            ? '/screenshots/preview-dark.png'
+            : '/screenshots/preview-light.png';
+
     return (
-        <section className="relative h-dvh flex flex-col items-center justify-center px-4 pt-16 pb-32 sm:pb-24 bg-background">
-            <GradientBackground />
+        <section id="top" className="relative min-h-dvh flex flex-col items-center justify-center px-4 pt-20 pb-28 sm:pb-24 gradient-mesh">
+            <div className="absolute inset-0 frosted z-0" />
 
-            <div className="relative z-10 w-full max-w-4xl mx-auto text-center px-2 sm:px-0">
-                {/* Headline with scramble animation */}
-                <h1
-                    ref={headlineRef}
-                    className="text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tighter mb-3 sm:mb-6"
-                />
+            <div className="relative z-10 w-full max-w-6xl mx-auto px-2 sm:px-0">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+                    <div className="text-center lg:text-start">
+                        {/* Headline with scramble animation */}
+                        <h1
+                            ref={headlineRef}
+                            className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter mb-4 text-white"
+                        />
 
-                {/* Subtitle */}
-                <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground/90 mb-6 sm:mb-10 max-w-2xl mx-auto leading-relaxed">
-                    {subtitle}
-                </p>
+                        {/* Subtitle */}
+                        <p className="text-sm sm:text-base md:text-lg text-white/80 mb-6 sm:mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+                            {subtitle}
+                        </p>
 
-                {/* Cannot create project warning (for logged-in users) */}
-                {auth.user && !isPusherConfigured && (
-                    <Alert variant="destructive" className="max-w-2xl mx-auto mb-4 text-left">
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertDescription>
-                            {t('Real-time features are not configured. Please contact support.')}
-                        </AlertDescription>
-                    </Alert>
-                )}
+                        <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 mb-6">
+                            <Button
+                                asChild
+                                size="lg"
+                                data-cta="hero-primary"
+                                onClick={() => trackCtaClick('hero_primary', 'hero')}
+                                className="w-full sm:w-auto glass-btn border-white/30 text-white hover:bg-white/20"
+                            >
+                                <Link href={heroPrimaryUrl}>{t('Start free')}</Link>
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="lg"
+                                data-cta="hero-demo"
+                                onClick={() => trackCtaClick('hero_demo', 'hero', '#product-showcase')}
+                                className="w-full sm:w-auto border-white/40 text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm"
+                                asChild
+                            >
+                                <a href="#product-showcase">{t('Watch the demo')}</a>
+                            </Button>
+                        </div>
 
-                {auth.user && !canCreateProject && isPusherConfigured && (
-                    <Alert variant="destructive" className="max-w-2xl mx-auto mb-4 text-left">
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertDescription>
-                            {cannotCreateReason}{' '}
-                            <Link href="/billing/plans" className="underline font-semibold">
-                                {t('View Plans')}
-                            </Link>
-                        </AlertDescription>
-                    </Alert>
-                )}
+                        {/* Cannot create project warning (for logged-in users) */}
+                        {auth.user && !isPusherConfigured && (
+                            <Alert variant="destructive" className="max-w-2xl mx-auto lg:mx-0 mb-4 text-left">
+                                <AlertCircle className="h-4 w-4" />
+                                <AlertDescription>
+                                    {t('Real-time features are not configured. Please contact support.')}
+                                </AlertDescription>
+                            </Alert>
+                        )}
 
-                {/* Prompt Input */}
-                <div className="max-w-2xl mx-auto">
-                    <form onSubmit={handleSubmit} className="relative">
-                        <div className="relative bg-card rounded-xl sm:rounded-2xl shadow-lg border border-border/50 overflow-hidden">
-                            <div className="relative">
-                                <textarea
-                                    ref={textareaRef}
-                                    value={prompt}
-                                    onChange={(e) => setPrompt(e.target.value)}
-                                    onFocus={() => setIsFocused(true)}
-                                    onBlur={() => setIsFocused(false)}
-                                    onKeyDown={handleKeyDown}
-                                    placeholder={isFocused ? t('I want to build...') : ""}
-                                    disabled={isDisabled}
-                                    className="w-full px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base resize-none focus:outline-none focus:ring-0 border-0 min-h-[80px] sm:min-h-[100px] bg-transparent relative z-10 text-start disabled:opacity-50 disabled:cursor-not-allowed"
-                                    rows={2}
-                                />
-                                {/* Animated placeholder overlay */}
-                                {showAnimatedPlaceholder && (
-                                    <div
-                                        className="absolute inset-0 px-3 sm:px-4 py-3 sm:py-4 pointer-events-none text-muted-foreground/60 text-sm sm:text-base text-start"
-                                        onClick={() => textareaRef.current?.focus()}
-                                    >
-                                        {animatedPlaceholder}
-                                        <span className="inline-block w-0.5 h-5 bg-primary/50 ms-0.5 animate-pulse align-middle" />
-                                    </div>
-                                )}
-                            </div>
-                            <div className="flex items-center justify-between gap-2 px-4 py-3 bg-muted/50 border-t border-border">
-                                {/* Keyboard hint */}
-                                <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
-                                    <span>{t('Press')}</span>
-                                    <kbd className="px-2 py-0.5 bg-card rounded border text-xs">
-                                        ⌘ Enter
-                                    </kbd>
-                                    <span>{t('to start')}</span>
-                                </div>
-                                <div className="flex items-center gap-2 ms-auto">
-                                    <Button
-                                        type="submit"
-                                        disabled={!prompt.trim() || isDisabled}
-                                        className="shrink-0 h-10 min-w-[100px] transition-all hover:scale-[1.02] hover:shadow-md"
-                                    >
-                                        <span className="text-sm sm:text-base">
-                                            {auth.user ? t('Start') : t('Go')}
-                                        </span>
-                                        {isRtl ? (
-                                            <ArrowLeft className="h-4 w-4 me-1.5" />
-                                        ) : (
-                                            <ArrowRight className="h-4 w-4 ms-1.5" />
+                        {auth.user && !canCreateProject && isPusherConfigured && (
+                            <Alert variant="destructive" className="max-w-2xl mx-auto lg:mx-0 mb-4 text-left">
+                                <AlertCircle className="h-4 w-4" />
+                                <AlertDescription>
+                                    {cannotCreateReason}{' '}
+                                    <Link href="/billing/plans" className="underline font-semibold">
+                                        {t('View Plans')}
+                                    </Link>
+                                </AlertDescription>
+                            </Alert>
+                        )}
+
+                        {/* Prompt Input */}
+                        <div className="max-w-2xl mx-auto lg:mx-0">
+                            <form onSubmit={handleSubmit} className="relative">
+                                <div className="relative bg-card rounded-xl sm:rounded-2xl shadow-lg border border-border/50 overflow-hidden">
+                                    <div className="relative">
+                                        <textarea
+                                            ref={textareaRef}
+                                            value={prompt}
+                                            onChange={(e) => setPrompt(e.target.value)}
+                                            onFocus={() => setIsFocused(true)}
+                                            onBlur={() => setIsFocused(false)}
+                                            onKeyDown={handleKeyDown}
+                                            placeholder={isFocused ? t('I want to build...') : ""}
+                                            disabled={isDisabled}
+                                            className="w-full px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base resize-none focus:outline-none focus:ring-0 border-0 min-h-[80px] sm:min-h-[100px] bg-transparent relative z-10 text-start disabled:opacity-50 disabled:cursor-not-allowed"
+                                            rows={2}
+                                        />
+                                        {/* Animated placeholder overlay */}
+                                        {showAnimatedPlaceholder && (
+                                            <div
+                                                className="absolute inset-0 px-3 sm:px-4 py-3 sm:py-4 pointer-events-none text-muted-foreground/60 text-sm sm:text-base text-start"
+                                                onClick={() => textareaRef.current?.focus()}
+                                            >
+                                                {animatedPlaceholder}
+                                                <span className="inline-block w-0.5 h-5 bg-primary/50 ms-0.5 animate-pulse align-middle" />
+                                            </div>
                                         )}
-                                    </Button>
+                                    </div>
+                                    <div className="flex items-center justify-between gap-2 px-4 py-3 bg-muted/50 border-t border-border">
+                                        {/* Keyboard hint */}
+                                        <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
+                                            <span>{t('Press')}</span>
+                                            <kbd className="px-2 py-0.5 bg-card rounded border text-xs">
+                                                ⌘ Enter
+                                            </kbd>
+                                            <span>{t('to start')}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 ms-auto">
+                                            <Button
+                                                type="submit"
+                                                disabled={!prompt.trim() || isDisabled}
+                                                className="shrink-0 h-10 min-w-[100px] transition-all hover:scale-[1.02] hover:shadow-md"
+                                                data-cta="hero-prompt"
+                                            >
+                                                <span className="text-sm sm:text-base">
+                                                    {auth.user ? t('Start') : t('Go')}
+                                                </span>
+                                                {isRtl ? (
+                                                    <ArrowLeft className="h-4 w-4 me-1.5" />
+                                                ) : (
+                                                    <ArrowRight className="h-4 w-4 ms-1.5" />
+                                                )}
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+
+                            {/* Suggestions - Marquee */}
+                            <div className="mt-4 sm:mt-6 overflow-hidden max-w-2xl relative">
+                                {/* Gradient fade on edges */}
+                                <div className="absolute start-0 top-0 bottom-0 w-6 sm:w-10 md:w-12 bg-gradient-to-r rtl:bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+                                <div className="absolute end-0 top-0 bottom-0 w-6 sm:w-10 md:w-12 bg-gradient-to-l rtl:bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+                                <div className={`flex gap-2 sm:gap-3 hover:[animation-play-state:paused] ${isRtl ? 'animate-marquee-rtl' : 'animate-marquee'}`}>
+                                    {/* Duplicate suggestions for seamless loop */}
+                                    {[...suggestions, ...suggestions].map((suggestion, index) => (
+                                        <button
+                                            key={`${suggestion}-${index}`}
+                                            onClick={() => handleSuggestionClick(suggestion)}
+                                            disabled={isDisabled}
+                                            className="text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-card hover:bg-accent border border-border text-muted-foreground hover:text-foreground transition-colors shadow-sm whitespace-nowrap shrink-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-card"
+                                        >
+                                            {suggestion}
+                                        </button>
+                                    ))}
                                 </div>
                             </div>
                         </div>
-                    </form>
+                    </div>
 
-                    {/* Suggestions - Marquee */}
-                    <div className="mt-4 sm:mt-6 overflow-hidden max-w-2xl relative">
-                        {/* Gradient fade on edges */}
-                        <div className="absolute start-0 top-0 bottom-0 w-6 sm:w-10 md:w-12 bg-gradient-to-r rtl:bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
-                        <div className="absolute end-0 top-0 bottom-0 w-6 sm:w-10 md:w-12 bg-gradient-to-l rtl:bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
-                        <div className={`flex gap-2 sm:gap-3 hover:[animation-play-state:paused] ${isRtl ? 'animate-marquee-rtl' : 'animate-marquee'}`}>
-                            {/* Duplicate suggestions for seamless loop */}
-                            {[...suggestions, ...suggestions].map((suggestion, index) => (
-                                <button
-                                    key={`${suggestion}-${index}`}
-                                    onClick={() => handleSuggestionClick(suggestion)}
-                                    disabled={isDisabled}
-                                    className="text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-card hover:bg-accent border border-border text-muted-foreground hover:text-foreground transition-colors shadow-sm whitespace-nowrap shrink-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-card"
-                                >
-                                    {suggestion}
-                                </button>
-                            ))}
+                    <div className="relative">
+                        <div className="relative rounded-3xl border border-border/60 bg-card/70 shadow-2xl overflow-hidden">
+                            <div className="flex items-center gap-2 px-4 py-3 bg-muted/50 border-b border-border">
+                                <div className="flex items-center gap-1.5">
+                                    <div className="w-3 h-3 rounded-full bg-red-500" />
+                                    <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                                    <div className="w-3 h-3 rounded-full bg-green-500" />
+                                </div>
+                                <span className="text-xs text-muted-foreground ms-2">
+                                    {t('Live preview')}
+                                </span>
+                            </div>
+                            <div className="relative aspect-[4/3] bg-background">
+                                <img
+                                    src={showcaseImage}
+                                    alt={t('Landing page preview')}
+                                    className="absolute inset-0 w-full h-full object-cover object-top"
+                                    loading="lazy"
+                                />
+                            </div>
+                        </div>
+                        <div className="absolute -bottom-6 -end-6 hidden md:block bg-primary/10 text-primary px-4 py-2 rounded-full text-xs font-medium border border-primary/20">
+                            {t('No-code + AI')}
                         </div>
                     </div>
                 </div>

@@ -1,0 +1,55 @@
+Create a landing page with the following structure:
+
+1. HEADER:
+- Company logo on the left
+- Short navigation menu: Features, Pricing, FAQ, Contact Us
+- Main CTA button: "Start Now" / "Try Free"
+
+2. HERO SECTION:
+- Attractive main headline
+- Short description explaining the value proposition
+- Prominent CTA button
+- Image/illustration/video
+
+3. FEATURES SECTION:
+- List of main product features
+- Icons or thumbnails for each feature
+- Short and easy to read text
+
+4. BENEFITS SECTION:
+- Why the product is useful for users
+- Examples of use cases
+
+5. TESTIMONIALS SECTION:
+- Customer reviews
+- Customer photos/logos
+
+6. SECONDARY CTA:
+- Encourage visitors to register or try
+
+7. FAQ SECTION:
+- Frequently asked questions with accordion (expandable/collapsible)
+
+8. FOOTER:
+- Social media links
+- Privacy policy
+- Contact information
+- Other internal links
+
+Also add:
+- Registration/signup form (Name, Email, Company)
+- Form validation
+- Trackable CTA links
+- Video support on page
+- Social sharing buttons (Facebook, LinkedIn, Twitter)
+- Responsive design for all devices
+- Fast loading
+- SEO optimized (H1-H3 headings, meta title/description)
+- Google Analytics integration
+- A/B testing capability
+
+Use modern, clean design with:
+- Consistent color scheme matching brand identity
+- Clear and readable text
+- Prominent and attractive CTA buttons
+- Supporting icons and graphics

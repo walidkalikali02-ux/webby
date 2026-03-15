@@ -8,6 +8,7 @@ import { LanguageSelector } from '@/components/LanguageSelector';
 import ApplicationLogo from '@/components/ApplicationLogo';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/contexts/LanguageContext';
+import { trackCtaClick, withUtm } from '@/lib/analytics';
 
 interface NavbarProps {
     auth: {
@@ -34,9 +35,15 @@ export function Navbar({ auth, canLogin, canRegister, enabledSectionTypes = [] }
 
     // Map section types to their nav links
     const allNavLinks = useMemo(() => [
+        { label: t('Home'), href: '#top', isAnchor: true, sectionType: 'hero' },
         { label: t('Features'), href: '#features', isAnchor: true, sectionType: 'features' },
+        { label: t('Solutions'), href: '/marketer', isAnchor: false, sectionType: 'product_showcase' },
+        { label: t('Benefits'), href: '#benefits', isAnchor: true, sectionType: 'use_cases' },
         { label: t('Pricing'), href: '#pricing', isAnchor: true, sectionType: 'pricing' },
-        { label: t('Use Cases'), href: '#use-cases', isAnchor: true, sectionType: 'use_cases' },
+        { label: t('FAQ'), href: '#faq', isAnchor: true, sectionType: 'faq' },
+        { label: t('Contact'), href: '#contact', isAnchor: true, sectionType: 'footer' },
+        { label: t('Marketer'), href: '/marketer', isAnchor: false, sectionType: 'marketer' },
+        { label: t('Founders'), href: '/founders', isAnchor: false, sectionType: 'founders' },
     ], [t]);
 
     // Filter nav links based on enabled sections
@@ -45,8 +52,14 @@ export function Navbar({ auth, canLogin, canRegister, enabledSectionTypes = [] }
         if (enabledSectionTypes.length === 0) {
             return allNavLinks;
         }
-        return allNavLinks.filter(link => enabledSectionTypes.includes(link.sectionType));
+        return allNavLinks.filter(link => enabledSectionTypes.includes(link.sectionType) || link.sectionType === 'footer');
     }, [allNavLinks, enabledSectionTypes]);
+
+    const primaryCtaUrl = withUtm('/register', {
+        utm_source: 'landing',
+        utm_medium: 'cta',
+        utm_campaign: 'nav_primary',
+    });
 
     useEffect(() => {
         const handleScroll = () => {
@@ -62,7 +75,7 @@ export function Navbar({ auth, canLogin, canRegister, enabledSectionTypes = [] }
             className={cn(
                 'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
                 scrolled
-                    ? 'bg-background/80 backdrop-blur-md border-b border-border shadow-sm'
+                    ? 'glass-dark shadow-lg'
                     : 'bg-transparent'
             )}
         >
@@ -81,7 +94,7 @@ export function Navbar({ auth, canLogin, canRegister, enabledSectionTypes = [] }
                                     key={link.label}
                                     href={link.href}
                                     onClick={(e) => handleSmoothScroll(e, link.href)}
-                                    className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                                    className="text-sm font-medium text-white/80 hover:text-white transition-colors cursor-pointer"
                                 >
                                     {link.label}
                                 </a>
@@ -89,7 +102,7 @@ export function Navbar({ auth, canLogin, canRegister, enabledSectionTypes = [] }
                                 <Link
                                     key={link.label}
                                     href={link.href}
-                                    className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                                    className="text-sm font-medium text-white/80 hover:text-white transition-colors"
                                 >
                                     {link.label}
                                 </Link>
@@ -102,19 +115,24 @@ export function Navbar({ auth, canLogin, canRegister, enabledSectionTypes = [] }
                         <LanguageSelector />
                         <ThemeToggle />
                         {auth.user ? (
-                            <Button asChild>
+                            <Button asChild className="glass-btn text-white">
                                 <Link href="/create">{t('Dashboard')}</Link>
                             </Button>
                         ) : (
                             <>
                                 {canLogin && (
-                                    <Button variant="ghost" asChild>
+                                    <Button variant="ghost" asChild className="text-white/80 hover:text-white">
                                         <Link href="/login">{t('Sign in')}</Link>
                                     </Button>
                                 )}
                                 {canRegister && (
-                                    <Button asChild>
-                                        <Link href="/register">{t('Get started')}</Link>
+                                    <Button
+                                        asChild
+                                        data-cta="nav-primary"
+                                        onClick={() => trackCtaClick('nav_primary', 'navbar', primaryCtaUrl)}
+                                        className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white border border-white/30"
+                                    >
+                                        <Link href={primaryCtaUrl}>{t('Start free')}</Link>
                                     </Button>
                                 )}
                             </>
@@ -179,11 +197,16 @@ export function Navbar({ auth, canLogin, canRegister, enabledSectionTypes = [] }
                                                         <Link href="/login">{t('Sign in')}</Link>
                                                     </Button>
                                                 )}
-                                                {canRegister && (
-                                                    <Button asChild className="w-full">
-                                                        <Link href="/register">{t('Get started')}</Link>
-                                                    </Button>
-                                                )}
+                                        {canRegister && (
+                                            <Button
+                                                asChild
+                                                className="w-full"
+                                                data-cta="nav-primary-mobile"
+                                                onClick={() => trackCtaClick('nav_primary_mobile', 'navbar', primaryCtaUrl)}
+                                            >
+                                                <Link href={primaryCtaUrl}>{t('Start free')}</Link>
+                                            </Button>
+                                        )}
                                             </>
                                         )}
                                     </div>

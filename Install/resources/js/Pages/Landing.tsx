@@ -115,6 +115,8 @@ export default function Landing({
     const pageProps = usePage<PageProps>().props;
     const { errors } = pageProps as { errors?: { prompt?: string } };
     const { appSettings } = pageProps;
+    const metaTitle = appSettings?.site_tagline || t('Build high-converting landing pages');
+    const metaDescription = appSettings?.site_description || t('Design, optimize, and launch landing pages with built-in analytics, CRM-ready lead capture, and SEO best practices.');
 
     // Show toast when there are errors
     useEffect(() => {
@@ -184,8 +186,8 @@ export default function Landing({
                         auth={auth}
                         initialSuggestions={heroSuggestions}
                         initialTypingPrompts={heroTypingPrompts}
-                        initialHeadline={heroHeadlines[0] || t('What will you build today?')}
-                        initialSubtitle={heroSubtitles[0] || t('Create stunning websites by chatting with AI.')}
+                        initialHeadline={heroHeadlines[0] || t('Launch landing pages that convert')}
+                        initialSubtitle={heroSubtitles[0] || t('Design, track, and optimize every step from a single workspace.')}
                         isPusherConfigured={isPusherConfigured}
                         canCreateProject={canCreateProject}
                         cannotCreateReason={cannotCreateReason}
@@ -250,7 +252,13 @@ export default function Landing({
 
     return (
         <>
-            <Head title={appSettings?.site_tagline || t("Build Websites with AI")} />
+            <Head title={metaTitle}>
+                <meta name="description" content={metaDescription} />
+                <meta property="og:title" content={metaTitle} />
+                <meta property="og:description" content={metaDescription} />
+                <meta property="og:type" content="website" />
+                <meta name="twitter:card" content="summary_large_image" />
+            </Head>
             <Toaster />
             {!isPreview && <DemoIframeBlocker />}
             <Navbar auth={auth} canLogin={canLogin} canRegister={canRegister} enabledSectionTypes={enabledSectionTypes} />

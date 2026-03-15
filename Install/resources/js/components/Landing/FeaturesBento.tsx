@@ -33,17 +33,20 @@ export function FeaturesBento({ content, items, settings: _settings }: FeaturesB
         : getTranslatedFeatures(t);
 
     // Get content with defaults - DB content takes priority
-    const title = (content?.title as string) || t('Everything you need to build');
-    const subtitle = (content?.subtitle as string) || t("From idea to deployment, we've got you covered with powerful features designed for modern development.");
+    const title = (content?.title as string) || t('Launch-ready features');
+    const subtitle = (content?.subtitle as string) || t('Everything you need to design, track, and optimize your landing pages.');
     return (
-        <section id="features" className="py-16 lg:py-24">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section id="features" className="py-16 lg:py-24 relative">
+            <div className="absolute inset-0 gradient-mesh opacity-50" />
+            <div className="absolute inset-0 frosted" />
+            
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 {/* Section Header */}
                 <div className="text-center mb-12">
-                    <h2 className="text-3xl md:text-4xl font-bold tracking-tighter mb-4">
+                    <h2 className="text-3xl md:text-4xl font-bold tracking-tighter mb-4 text-white">
                         {title}
                     </h2>
-                    <p className="text-lg text-muted-foreground/90 max-w-2xl mx-auto leading-relaxed">
+                    <p className="text-lg text-white/70 max-w-2xl mx-auto leading-relaxed">
                         {subtitle}
                     </p>
                 </div>
@@ -56,7 +59,7 @@ export function FeaturesBento({ content, items, settings: _settings }: FeaturesB
                             <Card
                                 key={feature.id}
                                 className={cn(
-                                    'group shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1',
+                                    'group glass-card cursor-pointer',
                                     feature.size === 'large' && 'md:col-span-2 lg:row-span-2',
                                     feature.size === 'medium' && 'lg:col-span-2'
                                 )}
@@ -82,13 +85,13 @@ export function FeaturesBento({ content, items, settings: _settings }: FeaturesB
                                     ) : (
                                         <div
                                             className={cn(
-                                                'w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors',
+                                                'w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center mb-4 group-hover:bg-white/20 transition-colors',
                                                 feature.size === 'large' && 'w-16 h-16'
                                             )}
                                         >
                                             <Icon
                                                 className={cn(
-                                                    'w-6 h-6 text-primary',
+                                                    'w-6 h-6 text-white',
                                                     feature.size === 'large' && 'w-8 h-8'
                                                 )}
                                             />
@@ -96,7 +99,7 @@ export function FeaturesBento({ content, items, settings: _settings }: FeaturesB
                                     )}
                                     <CardTitle
                                         className={cn(
-                                            'text-lg',
+                                            'text-lg text-white',
                                             feature.size === 'large' && 'text-2xl'
                                         )}
                                     >
@@ -106,7 +109,7 @@ export function FeaturesBento({ content, items, settings: _settings }: FeaturesB
                                 <CardContent>
                                     <CardDescription
                                         className={cn(
-                                            'text-sm',
+                                            'text-sm text-white/70',
                                             feature.size === 'large' && 'text-base'
                                         )}
                                     >

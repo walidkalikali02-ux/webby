@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Check, X, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/contexts/LanguageContext';
+import { trackCtaClick, withUtm } from '@/lib/analytics';
 
 interface PlanFeature {
     name: string;
@@ -82,6 +83,12 @@ function PlanCard({ plan, t }: { plan: Plan; t: TranslationFn }) {
         }
         return t(':count custom subdomains', { count: plan.max_subdomains_per_user ?? 0 });
     };
+
+    const planCtaUrl = withUtm('/billing/plans', {
+        utm_source: 'landing',
+        utm_medium: 'cta',
+        utm_campaign: `pricing_${plan.slug}`,
+    });
 
     return (
         <Card
@@ -165,8 +172,14 @@ function PlanCard({ plan, t }: { plan: Plan; t: TranslationFn }) {
                 </ul>
             </CardContent>
             <CardFooter>
-                <Button className="w-full" variant={plan.is_popular ? 'default' : 'outline'} asChild>
-                    <Link href="/billing/plans">{t('Get Started')}</Link>
+                <Button
+                    className="w-full"
+                    variant={plan.is_popular ? 'default' : 'outline'}
+                    asChild
+                    data-cta={`pricing-${plan.slug}`}
+                    onClick={() => trackCtaClick(`pricing_${plan.slug}`, 'pricing', planCtaUrl)}
+                >
+                    <Link href={planCtaUrl}>{t('Get Started')}</Link>
                 </Button>
             </CardFooter>
         </Card>
@@ -183,13 +196,16 @@ export function PricingSection({ plans, content, settings: _settings }: PricingS
     const subtitle = (content?.subtitle as string) || t('Choose the plan that fits your needs. All plans include access to our AI-powered website builder.');
 
     return (
-        <section id="pricing" className="py-16 lg:py-24">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section id="pricing" className="py-16 lg:py-24 relative">
+            <div className="absolute inset-0 gradient-mesh opacity-50" />
+            <div className="absolute inset-0 frosted" />
+            
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <div className="text-center mb-12">
-                    <h2 className="text-3xl md:text-4xl font-bold tracking-tighter mb-4">
+                    <h2 className="text-3xl md:text-4xl font-bold tracking-tighter mb-4 text-white">
                         {title}
                     </h2>
-                    <p className="text-lg text-muted-foreground/90 max-w-2xl mx-auto leading-relaxed">
+                    <p className="text-lg text-white/70 max-w-2xl mx-auto leading-relaxed">
                         {subtitle}
                     </p>
                 </div>

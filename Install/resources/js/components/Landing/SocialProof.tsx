@@ -37,16 +37,17 @@ export function SocialProof({ statistics, content }: SocialProofProps) {
     ];
 
     return (
-        <section className="py-16 lg:py-20 bg-muted/30">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="py-16 lg:py-20 relative">
+            <div className="absolute inset-0 glass-dark" />
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 {/* Stats */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
                     {stats.map((stat) => (
-                        <div key={stat.label} className="text-center">
-                            <div className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">
+                        <div key={stat.label} className="text-center glass-card rounded-xl p-6">
+                            <div className="text-2xl md:text-3xl lg:text-4xl font-bold text-white">
                                 {stat.value}
                             </div>
-                            <div className="text-sm md:text-base text-muted-foreground mt-1">
+                            <div className="text-sm md:text-base text-white/70 mt-1">
                                 {stat.label}
                             </div>
                         </div>

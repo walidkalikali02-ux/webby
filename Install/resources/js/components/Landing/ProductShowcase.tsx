@@ -32,10 +32,10 @@ export function ProductShowcase({ content, items, settings }: ProductShowcasePro
     const [activeView, setActiveView] = useState<string>('preview');
 
     // Get content with defaults - DB content takes priority
-    const title = (content?.title as string) || t('See it in action');
-    const subtitle = (content?.subtitle as string) || t('A powerful development environment that lets you chat with AI, edit code, and manage projects all in one place.');
+    const title = (content?.title as string) || t('See the experience in action');
+    const subtitle = (content?.subtitle as string) || t('Preview pages, play demo videos, and explore interactive tools without leaving the page.');
     const videoUrl = content?.video_url as string | undefined;
-    const showcaseType = settings?.showcase_type || 'screenshots';
+    const showcaseType = settings?.showcase_type || (videoUrl ? 'video' : 'screenshots');
 
     // Use database items if provided, otherwise fall back to translated defaults
     const tabs = useMemo(() => {
@@ -86,15 +86,41 @@ export function ProductShowcase({ content, items, settings }: ProductShowcasePro
         return null;
     };
 
+    // Extract Vimeo video ID from URL
+    const getVimeoEmbedUrl = (url: string) => {
+        const regExp = /(?:vimeo\.com\/)(\d+)/;
+        const match = url.match(regExp);
+        const videoId = match ? match[1] : null;
+        if (videoId) {
+            return `https://player.vimeo.com/video/${videoId}`;
+        }
+        return null;
+    };
+
+    // Get embed URL for any video platform
+    const getVideoEmbedUrl = (url: string) => {
+        // Try YouTube first
+        const youtubeUrl = getYouTubeEmbedUrl(url);
+        if (youtubeUrl) return youtubeUrl;
+        
+        // Try Vimeo
+        const vimeoUrl = getVimeoEmbedUrl(url);
+        if (vimeoUrl) return vimeoUrl;
+        
+        return null;
+    };
+
     return (
-        <section className="py-16 lg:py-24 bg-muted/30">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section id="solutions" className="py-16 lg:py-24 relative">
+            <div className="absolute inset-0 gradient-mesh opacity-30" />
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <span id="product-showcase" className="sr-only" aria-hidden="true" />
                 {/* Section Header */}
                 <div className="text-center mb-12">
-                    <h2 className="text-3xl md:text-4xl font-bold tracking-tighter mb-4">
+                    <h2 className="text-3xl md:text-4xl font-bold tracking-tighter mb-4 text-white">
                         {title}
                     </h2>
-                    <p className="text-lg text-muted-foreground/90 max-w-2xl mx-auto leading-relaxed">
+                    <p className="text-lg text-white/70 max-w-2xl mx-auto leading-relaxed">
                         {subtitle}
                     </p>
                 </div>
@@ -115,9 +141,9 @@ export function ProductShowcase({ content, items, settings }: ProductShowcasePro
 
                             {/* Video Area */}
                             <div className="relative aspect-video bg-background">
-                                {getYouTubeEmbedUrl(videoUrl) ? (
+                                {getVideoEmbedUrl(videoUrl) ? (
                                     <iframe
-                                        src={getYouTubeEmbedUrl(videoUrl)!}
+                                        src={getVideoEmbedUrl(videoUrl)!}
                                         title="Product demo video"
                                         className="absolute inset-0 w-full h-full"
                                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
