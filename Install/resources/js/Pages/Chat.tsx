@@ -18,7 +18,7 @@ import { useUserChannel } from '@/hooks/useUserChannel';
 import { useTranslation } from '@/contexts/LanguageContext';
 import { PageProps, User } from '@/types';
 import type { UserNotification } from '@/types/notifications';
-import { Home, Eye, Code, Loader2, Hammer, ExternalLink, Brain, Settings, Globe, MousePointerClick, Palette } from 'lucide-react';
+import { Home, Eye, Code, Loader2, Hammer, ExternalLink, Brain, Settings, Globe, MousePointerClick, Palette, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { Toaster } from '@/components/ui/sonner';
 import axios from 'axios';
@@ -28,6 +28,7 @@ import { InspectPreview } from '@/components/Preview/InspectPreview';
 import { ChatInputWithMentions } from '@/components/Chat/ChatInputWithMentions';
 import { BuildCreditsIndicator } from '@/components/Chat/BuildCreditsIndicator';
 import { ThemeDesigner } from '@/components/Design/ThemeDesigner';
+import { RouteCombobox } from '@/components/Navigation/RouteCombobox';
 import { useBuildCredits, BuildCreditsInfo } from '@/hooks/useBuildCredits';
 import type { ElementMention, PendingEdit } from '@/types/inspector';
 import type { AttachedFile } from '@/types/chat';
@@ -191,6 +192,7 @@ export default function Chat({
         },
     });
     const [viewMode, setViewMode] = useState<ViewMode>(getInitialViewMode);
+    const [showQuickNav, setShowQuickNav] = useState(false);
 
     // Sync viewMode to URL
     useEffect(() => {
@@ -627,6 +629,21 @@ export default function Chat({
                             </p>
                         </div>
                         <div className="flex items-center gap-1">
+                            {/* Quick Navigation */}
+                            <div className="hidden sm:block relative">
+                                <RouteCombobox 
+                                    className="w-40 lg:w-48" 
+                                    placeholder={t('Search...')}
+                                />
+                            </div>
+                            <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="sm:hidden"
+                                onClick={() => setShowQuickNav(true)}
+                            >
+                                <Search className="h-4 w-4" />
+                            </Button>
                             {/* Mobile only: navigate to settings page (desktop has Settings tab in preview panel) */}
                             <Button variant="ghost" size="icon" asChild className="md:hidden">
                                 <Link href={`/project/${project.id}/settings`}>
@@ -1008,6 +1025,25 @@ export default function Chat({
                     toast.success(t('Published to :url', { url }));
                 }}
             />
+
+            {/* Mobile Quick Navigation Dialog */}
+            {showQuickNav && (
+                <div 
+                    className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm sm:hidden"
+                    onClick={() => setShowQuickNav(false)}
+                >
+                    <div 
+                        className="fixed inset-x-4 top-4 z-50"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <RouteCombobox 
+                            className="w-full" 
+                            placeholder={t('Search routes...')}
+                            onSelect={() => setShowQuickNav(false)}
+                        />
+                    </div>
+                </div>
+            )}
         </>
     );
 }

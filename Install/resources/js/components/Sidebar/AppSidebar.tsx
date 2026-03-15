@@ -44,6 +44,7 @@ import {
 import { Button } from '@/components/ui/button';
 import ApplicationLogo from '@/components/ApplicationLogo';
 import { ShareDialog } from '@/components/Referral/ShareDialog';
+import { RouteCombobox } from '@/components/Navigation/RouteCombobox';
 import { PageProps } from '@/types';
 import { useTranslation } from '@/contexts/LanguageContext';
 
@@ -138,15 +139,22 @@ export function AppSidebar({ user }: AppSidebarProps) {
 
     const isActive = (href: string) => url.startsWith(href);
 
-    return (
+return (
         <Sidebar className="border-r group/sidebar">
-            <SidebarHeader className="h-[60px] px-4 border-b flex-row items-center">
-                <Link href="/create" className="flex items-center">
+            <SidebarHeader className="h-[60px] px-4 border-b flex-row items-center gap-3">
+                <Link href="/create" className="flex items-center flex-shrink-0">
                     <ApplicationLogo showText size="lg" />
                 </Link>
             </SidebarHeader>
 
             <SidebarContent className="!overflow-hidden flex-1">
+                {/* Route Combobox Search */}
+                <SidebarGroup className="pt-3 pb-0 px-3">
+                    <SidebarGroupContent>
+                        <RouteCombobox placeholder={t('Search routes...')} />
+                    </SidebarGroupContent>
+                </SidebarGroup>
+
                 <div ref={scrollAreaRef} className="h-full">
                 <ScrollArea className="h-full [&_[data-slot=scroll-area-scrollbar]]:opacity-0 [&_[data-slot=scroll-area-scrollbar]]:transition-opacity group-hover/sidebar:[&_[data-slot=scroll-area-scrollbar]]:opacity-100" type="always">
                     {/* Create Link */}
