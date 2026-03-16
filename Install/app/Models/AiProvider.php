@@ -47,9 +47,11 @@ class AiProvider extends Model
             'deepseek-chat',
         ],
         self::TYPE_ZHIPU => [
-            'glm-5',
-            'glm-4.7',
+            'glm-4.5',
             'glm-4.5-air',
+            'glm-4.6',
+            'glm-4.7',
+            'glm-5',
         ],
         self::TYPE_GOOGLE => [
             'gemini-2.0-flash',
@@ -84,9 +86,11 @@ class AiProvider extends Model
             'deepseek-chat' => ['input' => 0.28, 'output' => 0.42],
         ],
         self::TYPE_ZHIPU => [
-            'glm-5' => ['input' => 0, 'output' => 0],
-            'glm-4.7' => ['input' => 0, 'output' => 0],
+            'glm-4.5' => ['input' => 0, 'output' => 0],
             'glm-4.5-air' => ['input' => 0, 'output' => 0],
+            'glm-4.6' => ['input' => 0, 'output' => 0],
+            'glm-4.7' => ['input' => 0, 'output' => 0],
+            'glm-5' => ['input' => 0, 'output' => 0],
         ],
         self::TYPE_GOOGLE => [
             'gemini-2.0-flash' => ['input' => 0.00, 'output' => 0.00],
@@ -200,7 +204,7 @@ class AiProvider extends Model
 
         return $models[0] ?? match ($this->type) {
             self::TYPE_ANTHROPIC => 'claude-sonnet-4-5',
-            self::TYPE_ZHIPU => 'glm-5',
+            self::TYPE_ZHIPU => 'glm-4.5',
             default => 'gpt-5.2',
         };
     }
